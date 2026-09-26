@@ -25,9 +25,10 @@ const featured = [
 const featuredMap = new Map(featured);
 const slides = [...featured.map(([file,label])=>({file,label})), ...allFiles.filter(file=>!featuredMap.has(file)).map(file=>({file,label:'A real reply'}))];
 const timeline = [
-  ...slides.slice(0,23).map((slide,index)=>({...slide,ordinal:index+1})),
-  {secret:true,ordinal:23,label:'The original message'},
-  ...slides.slice(23).map((slide,index)=>({...slide,ordinal:index+24}))
+  ...slides.slice(0,3).map((slide,index)=>({...slide,ordinal:index+1})),
+  {clue:true,ordinal:3,label:'The video clue'},
+  {secret:true,ordinal:3,label:'The original message'},
+  ...slides.slice(3).map((slide,index)=>({...slide,ordinal:index+4}))
 ];
 
 // Kept verbatim from the user's supplied outreach message.
@@ -56,8 +57,10 @@ Would love to see if there's a fit!`;
 const $ = id => document.getElementById(id);
 const deck = $('deck');
 const activeCard = $('activeCard');
+const clueCard = $('clueCard');
 const replyImage = $('replyImage');
 const secretCard = $('secretCard');
+const nextCard = $('nextCard');
 const form = $('messageForm');
 let position = 0;
 let busy = false;
@@ -68,43 +71,76 @@ let toastTimer = null;
 function render() {
   const item = timeline[position];
   const isSecret = Boolean(item.secret);
-  activeCard.hidden = isSecret;
+  const isClue = Boolean(item.clue);
+  activeCard.hidden = isSecret || isClue;
+  clueCard.hidden = !isClue;
   secretCard.hidden = !isSecret;
-  if (!isSecret) {
+  if (!isSecret && !isClue) {
     replyImage.src = `assets/screens/${item.file}`;
     replyImage.alt = `Redacted original screenshot, reply ${item.ordinal} of 35: ${item.label}`;
   }
   $('cardTitle').textContent = item.label;
-  $('cardMeta').textContent = isSecret ? 'MESSAGE UNLOCKED' : `${String(item.ordinal).padStart(2,'0')} of 35`;
-  $('progressLabel').textContent = isSecret ? 'MESSAGE UNLOCKED' : `REPLY ${String(item.ordinal).padStart(2,'0')} / 35`;
-  $('progressHint').textContent = !isSecret && item.ordinal <= 23 ? `${24-item.ordinal} to unlock` : 'treasure found';
-  $('progressFill').style.width = `${Math.min(item.ordinal,35)/35*100}%`;
-  $('hint').hidden = !(item.ordinal >= 22 && item.ordinal <= 23);
+  $('cardMeta').textContent = isSecret ? 'MESSAGE UNLOCKED' : isClue ? 'SWIPE TO REVEAL' : `${String(item.ordinal).padStart(2,'0')} of 35`;
+  $('progressLabel').textContent = isSecret ? 'MESSAGE UNLOCKED' : isClue ? 'THE CLUE' : `REPLY ${String(item.ordinal).padStart(2,'0')} / 35`;
+  $('progressHint').textContent = isSecret || item.ordinal > 3 ? 'treasure found' : isClue ? '1 swipe to reveal' : `${5-item.ordinal} swipes to reveal`;
+  $('progressFill').style.width = `${isSecret || item.ordinal>3 ? 100 : isClue ? 80 : item.ordinal*20}%`;
+  const next = timeline[position+1];
+  const afterNext = timeline[position+2];
+  $('nextPreview').hidden = !next || Boolean(next.secret);
+  $('treasurePeek').hidden = !next?.secret;
+  nextCard.classList.toggle('secret-next',Boolean(next?.secret));
+  nextCard.classList.toggle('clue-next',Boolean(next?.clue));
+  if (next?.file) $('nextPreview').src=`assets/screens/${next.file}`;
+  else if (next?.clue) $('nextPreview').src='assets/vijay-poster.jpg';
+  $('thirdPreview').hidden = !afterNext?.file;
+  if (afterNext?.file) $('thirdPreview').src=`assets/screens/${afterNext.file}`;
+  if (isClue) {
+    $('clueVideo').currentTime=0;
+    $('playClue').textContent='▶ Play with sound';
+    $('clueVideo').muted=false;
+    $('clueVideo').play().then(()=>$('playClue').textContent='↺ Replay with sound').catch(()=>{});
+  } else $('clueVideo').pause();
   const atEnd = position === timeline.length-1;
   $('swipeLeft').innerHTML = atEnd ? '<span aria-hidden="true">↺</span> REPLAY' : '<span aria-hidden="true">←</span> SWIPE LEFT';
   $('swipeRight').innerHTML = atEnd ? 'REPLAY <span aria-hidden="true">↺</span>' : 'SWIPE RIGHT <span aria-hidden="true">→</span>';
-  const next = timeline[position+1];
   if (next && next.file) { const preload = new Image(); preload.src = `assets/screens/${next.file}`; }
 }
 
+function topCard(){return timeline[position].secret?secretCard:timeline[position].clue?clueCard:activeCard;}
+function resetDrag(){
+  const card=topCard();
+  card.style.transition='transform .32s cubic-bezier(.18,.89,.25,1.3), opacity .32s';
+  card.style.transform=''; card.style.opacity='';
+  nextCard.style.transition='transform .32s ease, opacity .32s ease';
+  nextCard.style.transform=''; nextCard.style.opacity='';
+  deck.classList.remove('dragging','ready-to-toss');
+}
 function advance(direction) {
   if (busy) { queuedSwipes.push(direction); return; }
   if (position >= timeline.length-1) { queuedSwipes=[]; position=0; render(); window.scrollTo({top:0,behavior:'smooth'}); return; }
   busy = true;
-  if (timeline[position].secret || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    position++; render(); busy=false; if(queuedSwipes.length) advance(queuedSwipes.shift()); return;
+  const card=topCard();
+  deck.classList.remove('dragging','ready-to-toss');
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    position++; render(); busy=false; if(timeline[position].secret)queuedSwipes=[];else if(queuedSwipes.length)advance(queuedSwipes.shift()); return;
   }
-  activeCard.classList.remove('enter');
-  activeCard.classList.add(direction==='left'?'toss-left':'toss-right');
+  const sign=direction==='left'?-1:1;
+  card.style.transition='transform .33s cubic-bezier(.22,.8,.28,1), opacity .33s ease';
+  card.style.transform=`translate3d(${sign*135}%,22px,0) rotate(${sign*22}deg) scale(.9)`;
+  card.style.opacity='0';
+  nextCard.style.transition='transform .33s cubic-bezier(.22,.8,.28,1),opacity .33s ease';
+  nextCard.style.transform='translate3d(0,0,0) rotate(0deg) scale(1)';
+  nextCard.style.opacity='1';
   window.setTimeout(()=>{
+    card.style.transition=''; card.style.transform=''; card.style.opacity='';
+    nextCard.style.transition=''; nextCard.style.transform=''; nextCard.style.opacity='';
     position++;
-    activeCard.classList.remove('toss-left','toss-right');
     render();
-    if (!timeline[position].secret) activeCard.classList.add('enter');
+    if(timeline[position].secret)secretCard.scrollTop=0;
     busy=false;
     if(timeline[position].secret) queuedSwipes=[];
     else if(queuedSwipes.length) advance(queuedSwipes.shift());
-  },270);
+  },330);
 }
 
 function notify(message){
@@ -161,9 +197,36 @@ $('templateMessage').textContent=buildTemplate();
 render();
 $('swipeLeft').addEventListener('click',()=>advance('left'));
 $('swipeRight').addEventListener('click',()=>advance('right'));
-deck.addEventListener('pointerdown',event=>{if(event.target.closest('button'))return;pointerStart={x:event.clientX,y:event.clientY};});
-deck.addEventListener('pointerup',event=>{if(!pointerStart)return;const dx=event.clientX-pointerStart.x;const dy=event.clientY-pointerStart.y;pointerStart=null;if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.2)advance(dx<0?'left':'right');});
-deck.addEventListener('pointercancel',()=>pointerStart=null);
+deck.addEventListener('pointerdown',event=>{
+  if(busy||event.button!==0||event.target.closest('button'))return;
+  pointerStart={x:event.clientX,y:event.clientY,id:event.pointerId};
+  deck.setPointerCapture(event.pointerId);
+});
+deck.addEventListener('pointermove',event=>{
+  if(!pointerStart||busy)return;
+  const dx=event.clientX-pointerStart.x,dy=event.clientY-pointerStart.y;
+  if(Math.abs(dx)<5&&Math.abs(dy)<5)return;
+  if(Math.abs(dy)>Math.abs(dx)*1.4 && !deck.classList.contains('dragging'))return;
+  event.preventDefault();
+  deck.classList.add('dragging');
+  const amount=Math.min(Math.abs(dx)/Math.max(deck.clientWidth*.35,120),1);
+  const card=topCard();
+  card.style.transition='none';card.style.opacity='1';
+  card.style.transform=`translate3d(${dx}px,${dy*.12}px,0) rotate(${dx/18}deg) scale(${1-amount*.045})`;
+  nextCard.style.transition='none';
+  nextCard.style.transform=`translate3d(0,${8-amount*8}px,0) rotate(${-4+amount*4}deg) scale(${.94+amount*.06})`;
+  nextCard.style.opacity=String(.65+amount*.35);
+  deck.classList.toggle('ready-to-toss',Math.abs(dx)>Math.max(72,deck.clientWidth*.22));
+});
+deck.addEventListener('pointerup',event=>{
+  if(!pointerStart)return;
+  const dx=event.clientX-pointerStart.x,dy=event.clientY-pointerStart.y;
+  pointerStart=null;
+  if(deck.hasPointerCapture(event.pointerId))deck.releasePointerCapture(event.pointerId);
+  if(Math.abs(dx)>Math.max(72,deck.clientWidth*.22)&&Math.abs(dx)>Math.abs(dy)*1.1)advance(dx<0?'left':'right');
+  else resetDrag();
+});
+deck.addEventListener('pointercancel',()=>{pointerStart=null;resetDrag();});
 document.addEventListener('keydown',event=>{if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if($('videoDialog').open||$('imageDialog').open)return;if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();advance(event.key==='ArrowLeft'?'left':'right');}});
 $('expandImage').addEventListener('click',()=>{$('expandedImage').src=replyImage.src;$('expandedImage').alt=replyImage.alt;$('imageDialog').showModal();});
 $('closeImage').addEventListener('click',()=>$('imageDialog').close());
@@ -174,7 +237,8 @@ $('closeBuilder').addEventListener('click',()=>{$('builder').hidden=true;$('top'
 form.addEventListener('input',()=>$('templateMessage').textContent=buildTemplate());
 document.querySelectorAll('[data-example]').forEach(button=>button.addEventListener('click',()=>loadExample(button.dataset.example)));
 $('copyTemplate').addEventListener('click',()=>copyText(buildTemplate()));
-$('playHint').addEventListener('click',()=>{$('clueAudio').currentTime=0;$('clueAudio').play().catch(()=>notify('Audio playback is unavailable'));});
+$('playClue').addEventListener('click',()=>{$('clueVideo').currentTime=0;$('clueVideo').muted=false;$('clueVideo').play().then(()=>$('playClue').textContent='↺ Replay with sound').catch(()=>notify('Tap again to play the clip'));});
+$('clueVideo').addEventListener('ended',()=>$('playClue').textContent='↺ Replay with sound');
 $('openVideo').addEventListener('click',()=>{$('videoDialog').showModal();});
 $('closeVideo').addEventListener('click',()=>{$('callbackVideo').pause();$('videoDialog').close();});
 $('videoDialog').addEventListener('close',()=>$('callbackVideo').pause());

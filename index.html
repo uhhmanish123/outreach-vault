@@ -22,30 +22,31 @@
       <div class="story-column">
         <div class="eyebrow"><span class="eyebrow-line"></span> THE RECEIPTS</div>
         <h1>One message.<br><em>35 replies.</em></h1>
-        <p class="lead">Swipe through the original conversations. The message that started it all is hidden after reply 23.</p>
+        <p class="lead">Grab a card with your mouse or thumb. Toss it left or right to uncover what sits underneath.</p>
         <div class="progress-block">
-          <div class="progress-head"><span id="progressLabel">REPLY 01 / 35</span><span id="progressHint">23 to unlock</span></div>
+          <div class="progress-head"><span id="progressLabel">REPLY 01 / 35</span><span id="progressHint">4 swipes to reveal</span></div>
           <div class="progress-track"><div class="progress-fill" id="progressFill"></div><span class="treasure-tick" title="Message unlocks after reply 23">✦</span></div>
         </div>
-        <div class="swipe-note"><span class="gesture-icon" aria-hidden="true">↔</span><span>Swipe either way to reveal the next reply. Arrow keys work too.</span></div>
-        <div class="hint" id="hint" hidden>
-          <span class="hint-star" aria-hidden="true">✦</span>
-          <div><strong>You're close.</strong><p>Pull ke neeche dekh.</p></div>
-          <button type="button" class="mini-button" id="playHint">▶ Play clue</button>
-          <button type="button" class="mini-button subtle" id="openVideo">Watch video</button>
-        </div>
+        <div class="swipe-note"><span class="gesture-icon" aria-hidden="true">↔</span><span>Drag and release. Each toss reveals one card.</span></div>
       </div>
 
       <div class="deck-column">
         <div class="deck" id="deck">
-          <div class="stack-card stack-two" aria-hidden="true"></div>
-          <div class="stack-card stack-one" aria-hidden="true"></div>
+          <div class="stack-card stack-two" aria-hidden="true"><img id="thirdPreview" alt=""></div>
+          <div class="stack-card stack-one" id="nextCard" aria-hidden="true"><img id="nextPreview" alt=""><span id="treasurePeek">✦</span></div>
           <article class="active-card" id="activeCard" aria-live="polite">
             <img id="replyImage" alt="Redacted screenshot of a reply to the outreach message" src="" draggable="false">
             <button type="button" class="expand-button" id="expandImage" aria-label="Expand screenshot">⤢ <span>EXPAND</span></button>
           </article>
+          <article class="clue-card" id="clueCard" hidden aria-live="polite">
+            <div class="clue-top"><span>✦ THE CLUE</span><span>ONE CARD LEFT</span></div>
+            <div class="clue-video-wrap"><video id="clueVideo" playsinline preload="auto" poster="assets/vijay-poster.jpg"><source src="assets/clue-card.mp4" type="video/mp4"></video><button type="button" id="playClue" class="clue-play">▶ Play with sound</button></div>
+            <h2>Pull ke neeche dekh.</h2>
+            <p>Something is hiding under this card. Drag it away.</p>
+            <button type="button" class="full-video-link" id="openVideo">Watch the full video ↗</button>
+          </article>
           <article class="secret-card" id="secretCard" hidden aria-live="polite">
-            <div class="secret-top"><span class="secret-badge">✦ TREASURE FOUND</span><span>AFTER 23 REPLIES</span></div>
+            <div class="secret-top"><span class="secret-badge">✦ TREASURE FOUND</span><span>THE ORIGINAL MESSAGE</span></div>
             <h2>The message<br>behind the replies.</h2>
             <p>This is Manish's original outreach message, exactly as shared.</p>
             <pre id="originalMessage"></pre>
@@ -89,7 +90,6 @@
 
   <dialog id="videoDialog" class="video-dialog" aria-label="Watch the pull ke neeche dekh video"><button type="button" id="closeVideo" class="video-close" aria-label="Close video">×</button><video id="callbackVideo" controls preload="metadata" playsinline poster="assets/vijay-poster.jpg"><source src="assets/vijay-callback.mp4" type="video/mp4">Your browser does not support this video.</video></dialog>
   <dialog id="imageDialog" class="image-dialog" aria-label="Expanded reply screenshot"><button type="button" id="closeImage" class="image-close" aria-label="Close expanded screenshot">×</button><img id="expandedImage" alt="Expanded redacted original screenshot"></dialog>
-  <audio id="clueAudio" preload="none" src="assets/pull-ke-neeche-dekh-hint.mp3"></audio>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

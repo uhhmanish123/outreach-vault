@@ -101,8 +101,11 @@ function render() {
     $('clueVideo').play().then(()=>$('playClue').textContent='↺ Replay with sound').catch(()=>{});
   } else $('clueVideo').pause();
   const atEnd = position === timeline.length-1;
-  $('swipeLeft').innerHTML = atEnd ? '<span aria-hidden="true">↺</span> REPLAY' : '<span aria-hidden="true">←</span> SWIPE LEFT';
-  $('swipeRight').innerHTML = atEnd ? 'REPLAY <span aria-hidden="true">↺</span>' : 'SWIPE RIGHT <span aria-hidden="true">→</span>';
+  $('swipeLeft').innerHTML = atEnd ? '<span aria-hidden="true">↺</span>' : '<span aria-hidden="true">←</span>';
+  $('swipeRight').innerHTML = atEnd ? '<span aria-hidden="true">↺</span>' : '<span aria-hidden="true">→</span>';
+  $('swipeLeft').setAttribute('aria-label',atEnd?'Replay from the start':'Swipe left for next reply');
+  $('swipeRight').setAttribute('aria-label',atEnd?'Replay from the start':'Swipe right for next reply');
+  $('dragCallout').textContent=atEnd?'REPLAY THE DECK':'DRAG THE CARD ↔';
   if (next && next.file) { const preload = new Image(); preload.src = `assets/screens/${next.file}`; }
 }
 

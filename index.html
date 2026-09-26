@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14171b">
+  <meta name="description" content="Swipe through 35 real outreach replies and unlock the message behind them.">
+  <title>The Outreach Vault — 35 replies, one message</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2314171b'/%3E%3Cpath d='M15 27h34v24H15z' fill='%23e7ff70'/%3E%3Cpath d='M14 27l8-13h20l8 13' fill='none' stroke='%23e7ff70' stroke-width='5' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='38' r='4' fill='%2314171b'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="page-glow" aria-hidden="true"></div>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="The Outreach Vault, back to top"><span class="brand-mark">✦</span><span>THE OUTREACH VAULT</span></a>
+      <span class="top-note">35 real replies · 1 message behind them</span>
+    </header>
+
+    <section class="experience" id="top" aria-label="Swipe through outreach replies">
+      <div class="story-column">
+        <div class="eyebrow"><span class="eyebrow-line"></span> THE RECEIPTS</div>
+        <h1>One message.<br><em>35 replies.</em></h1>
+        <p class="lead">Swipe through the original conversations. The message that started it all is hidden after reply 23.</p>
+        <div class="progress-block">
+          <div class="progress-head"><span id="progressLabel">REPLY 01 / 35</span><span id="progressHint">23 to unlock</span></div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div><span class="treasure-tick" title="Message unlocks after reply 23">✦</span></div>
+        </div>
+        <div class="swipe-note"><span class="gesture-icon" aria-hidden="true">↔</span><span>Swipe either way to reveal the next reply. Arrow keys work too.</span></div>
+        <div class="hint" id="hint" hidden>
+          <span class="hint-star" aria-hidden="true">✦</span>
+          <div><strong>You're close.</strong><p>Pull ke neeche dekh.</p></div>
+          <button type="button" class="mini-button" id="playHint">▶ Play clue</button>
+          <button type="button" class="mini-button subtle" id="openVideo">Watch video</button>
+        </div>
+      </div>
+
+      <div class="deck-column">
+        <div class="deck" id="deck">
+          <div class="stack-card stack-two" aria-hidden="true"></div>
+          <div class="stack-card stack-one" aria-hidden="true"></div>
+          <article class="active-card" id="activeCard" aria-live="polite">
+            <img id="replyImage" alt="Redacted screenshot of a reply to the outreach message" src="" draggable="false">
+            <button type="button" class="expand-button" id="expandImage" aria-label="Expand screenshot">⤢ <span>EXPAND</span></button>
+          </article>
+          <article class="secret-card" id="secretCard" hidden aria-live="polite">
+            <div class="secret-top"><span class="secret-badge">✦ TREASURE FOUND</span><span>AFTER 23 REPLIES</span></div>
+            <h2>The message<br>behind the replies.</h2>
+            <p>This is Manish's original outreach message, exactly as shared.</p>
+            <pre id="originalMessage"></pre>
+            <div class="secret-actions"><button type="button" class="action-button" id="copyOriginal">Copy original message</button><button type="button" class="action-button secondary" id="showBuilder">Make your own version ↗</button></div>
+          </article>
+        </div>
+        <div class="card-meta"><span class="dot"></span><strong id="cardTitle">A real reply</strong><span id="cardMeta">01 of 35</span></div>
+        <div class="controls">
+          <button type="button" class="swipe-button" id="swipeLeft" aria-label="Swipe left for next reply"><span aria-hidden="true">←</span> SWIPE LEFT</button>
+          <button type="button" class="swipe-button primary" id="swipeRight" aria-label="Swipe right for next reply">SWIPE RIGHT <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="builder" id="builder" hidden aria-labelledby="builderTitle">
+      <div class="section-kicker">YOUR TURN</div>
+      <div class="builder-heading"><div><h2 id="builderTitle">Write your version.</h2><p>Keep the structure. Replace every example with your own honest details and real results.</p></div><button type="button" class="close-builder" id="closeBuilder">Close ×</button></div>
+      <div class="example-row"><span>Start with an example:</span><button type="button" data-example="growth">Growth intern</button><button type="button" data-example="design">Designer</button><button type="button" data-example="blank">Blank template</button></div>
+      <div class="builder-grid">
+        <form id="messageForm" class="form-grid" autocomplete="off">
+          <label>Recipient's first name<input name="recipient" placeholder="[First name]"></label>
+          <label>Your name<input name="sender" placeholder="[Your name]"></label>
+          <label>Company<input name="company" placeholder="[Company]"></label>
+          <label>Role<input name="role" placeholder="[Role]"></label>
+          <label class="wide">An honest gap or unconventional detail<input name="reason1" placeholder="[I didn't take the usual path into this field]"></label>
+          <label class="wide">A memorable work or personality detail<input name="reason2" placeholder="[I get obsessed with a problem worth solving]"></label>
+          <label class="wide">How you found opportunities<input name="reason3" placeholder="[I reached out directly to build my own opportunities]"></label>
+          <label class="wide">Proof point 1<input name="win1" placeholder="[Achievement with a real number or outcome]"></label>
+          <label class="wide">Proof point 2<input name="win2" placeholder="[Project, responsibility, or result]"></label>
+          <label class="wide">Proof point 3<input name="win3" placeholder="[Tool, system, or skill you built]"></label>
+          <label class="wide">Proof point 4<input name="win4" placeholder="[Business impact or collaboration]"></label>
+          <label>Resume URL<input name="resume" type="url" placeholder="[Resume link]"></label>
+          <label>Portfolio URL<input name="portfolio" type="url" placeholder="[Portfolio link]"></label>
+        </form>
+        <div class="preview-panel"><div class="preview-top"><span>LIVE MESSAGE</span><button type="button" id="copyTemplate">Copy your message ↗</button></div><pre id="templateMessage"></pre></div>
+      </div>
+    </section>
+
+    <footer class="footer"><span>Original screenshots · names and profile photos redacted</span><span>Built from 35 unique conversations</span></footer>
+  </main>
+
+  <dialog id="videoDialog" class="video-dialog" aria-label="Watch the pull ke neeche dekh video"><button type="button" id="closeVideo" class="video-close" aria-label="Close video">×</button><video id="callbackVideo" controls preload="metadata" playsinline poster="assets/vijay-poster.jpg"><source src="assets/vijay-callback.mp4" type="video/mp4">Your browser does not support this video.</video></dialog>
+  <dialog id="imageDialog" class="image-dialog" aria-label="Expanded reply screenshot"><button type="button" id="closeImage" class="image-close" aria-label="Close expanded screenshot">×</button><img id="expandedImage" alt="Expanded redacted original screenshot"></dialog>
+  <audio id="clueAudio" preload="none" src="assets/pull-ke-neeche-dekh-hint.mp3"></audio>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
